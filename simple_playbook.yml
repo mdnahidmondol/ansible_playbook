@@ -1,0 +1,38 @@
+# create a devops user on all hosts. This user should be part of the devops group
+# Install the "htop" utility. Htop is an improved version of top - an interactive system process monitor
+# Add thr Nginx repository to the web servers and start it as a service
+
+
+---
+- hosts: all
+  remote_user: dev
+  sudo: yes
+  tasks:
+    - group:
+      name: devops
+      state: present
+    - name: create devops user with admin privilesges
+
+      user: devops
+      comment: "Devops User"
+      uid: 2001
+      group: devops
+    - name: install htop package
+      action: apt name=htop state=present update_cache=yes
+
+- hosts: www
+  user: devops
+  sudo: yes
+  tasks:
+    - name: add official nginx repository
+      apt_repository:
+      repo: 'deb http://nginx.org/packages/ubuntu/ lucid nginx'
+    - name: install nginx web server and ensure its at the latest version
+      apt:
+        name: nginx
+        state: latest
+    - name: start nginx service
+      service:
+    - name: nginx
+      state: started
+      
